@@ -6,21 +6,28 @@ import {
 import 'source-map-support/register';
 import { formatError } from '../helpers/error.helper';
 import { ErrorsEnum } from '../types/errors.enum';
-import * as data from '../fake-data/MOCK_DATA.json';
+import data from '../fake-data/MOCK_DATA.json';
+import { IProductItemInterface } from '../types/product-item.interface';
 
 export const getProductsById: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
 ) => {
     try {
-        const id = event.pathParameters.productId;
-        const item = data.find((item: any) => item.id === Number(id));
+        const id =
+            event &&
+            event.pathParameters &&
+            Number(event.pathParameters.productId);
 
-        if (!id) {
+        if (id == null) {
             throw ErrorsEnum.WrongRequest;
         }
+
         if (!data) {
             throw ErrorsEnum.CorruptedData;
         }
+
+        const item = data.find((item: IProductItemInterface) => item.id === id);
+
         if (!item) {
             throw ErrorsEnum.NotFoundData;
         }

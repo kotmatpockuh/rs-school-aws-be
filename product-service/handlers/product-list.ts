@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
 import { formatError } from '../helpers/error.helper';
+import data from '../fake-data/MOCK_DATA.json';
 import { ErrorsEnum } from '../types/errors.enum';
-import * as data from '../fake-data/MOCK_DATA.json';
 
 export const getProductsList: APIGatewayProxyHandler = async () => {
     try {
@@ -14,7 +14,7 @@ export const getProductsList: APIGatewayProxyHandler = async () => {
             statusCode: 200,
             body: JSON.stringify({
                 count: data.length,
-                items: JSON.stringify(data),
+                items: data,
             }),
         };
     } catch (error) {

@@ -3,7 +3,7 @@ import { IError } from '../types/error.interface';
 
 export const formatError = (error: string, log?: string): IError => {
     if (error == null) {
-        return;
+        return null;
     }
 
     if (!(<String[]>Object.values(ErrorsEnum)).includes(error)) {
