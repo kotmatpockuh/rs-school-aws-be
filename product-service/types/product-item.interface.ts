@@ -1,4 +1,4 @@
-export interface IProductItemInterface {
+export interface IProductItem {
     id: number;
     make: string;
     model: string;

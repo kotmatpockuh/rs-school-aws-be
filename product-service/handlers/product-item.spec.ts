@@ -1,7 +1,7 @@
 import validData from '../fake-data/MOCK_DATA.json';
 import { formatError } from '../helpers/error.helper';
 import { ErrorsEnum } from '../types/errors.enum';
-import { IProductItemInterface } from '../types/product-item.interface';
+import { IProductItem } from '../types/product-item.interface';
 
 describe('handler: product-item', () => {
     beforeEach(() => {
@@ -13,7 +13,7 @@ describe('handler: product-item', () => {
             it('should return data', async () => {
                 const productId = 5;
                 const item = (validData || []).find(
-                    (item: IProductItemInterface) =>
+                    (item: IProductItem) =>
                         item.id === Number(productId)
                 );
 

@@ -19,6 +19,9 @@ export const getProductsList: APIGatewayProxyHandler = async () => {
 
         return {
             statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
             body: JSON.stringify({
                 count: data.length,
                 items: data,
@@ -28,6 +31,9 @@ export const getProductsList: APIGatewayProxyHandler = async () => {
     } catch (error) {
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
             body: JSON.stringify(
                 // TODO implement error codes
                 formatError(error)
