@@ -21,6 +21,9 @@ describe('handler: product-list', () => {
                     getProductsList(null, null, null)
                 ).resolves.toEqual({
                     statusCode: 200,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
                     body: JSON.stringify({
                         count: validData.length,
                         items: validData,
@@ -43,6 +46,9 @@ describe('handler: product-list', () => {
                         getProductsList(null, null, null)
                     ).resolves.toEqual({
                         statusCode: 500,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
                         body: JSON.stringify(
                             formatError(ErrorsEnum.CorruptedData)
                         ),

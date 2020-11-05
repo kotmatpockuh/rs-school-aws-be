@@ -1,7 +1,35 @@
-import { formatError } from './error.helper';
+import { formatError, throwError } from './error.helper';
 import { ErrorsEnum } from '../types/errors.enum';
 
 describe('helper: error', () => {
+    describe('on throwError', () => {
+        describe('given error is null', () => {
+            it('should return null error', () => {
+                try {
+                    throwError(null);
+                } catch (e) {
+                    expect(e).toEqual({
+                        type: null,
+                        statusCode: 500,
+                    });
+                }
+            });
+        });
+
+        describe('given error is presented', () => {
+            it('should return error', () => {
+                try {
+                    throwError(ErrorsEnum.NotFoundData, 405);
+                } catch (e) {
+                    expect(e).toEqual({
+                        type: ErrorsEnum.NotFoundData,
+                        statusCode: 405,
+                    });
+                }
+            });
+        });
+    });
+
     describe('on formatError', () => {
         describe('given error is null', () => {
             it('should return null error', () => {

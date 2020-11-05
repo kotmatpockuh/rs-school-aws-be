@@ -1,7 +1,14 @@
 import { ErrorsEnum } from '../types/errors.enum';
-import { IError } from '../types/error.interface';
+import { IResponseError } from '../types/response-error.interface';
 
-export const formatError = (error: string, log?: string): IError => {
+export const throwError = (type: ErrorsEnum, statusCode = 500): void => {
+    throw {
+        type,
+        statusCode,
+    };
+};
+
+export const formatError = (error: string, log?: string): IResponseError => {
     if (error == null) {
         return null;
     }

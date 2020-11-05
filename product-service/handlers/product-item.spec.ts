@@ -2,6 +2,10 @@ import validData from '../fake-data/MOCK_DATA.json';
 import { formatError } from '../helpers/error.helper';
 import { ErrorsEnum } from '../types/errors.enum';
 import { IProductItem } from '../types/product-item.interface';
+import {
+    APIGatewayEventDefaultAuthorizerContext,
+    APIGatewayProxyEventBase,
+} from 'aws-lambda';
 
 describe('handler: product-item', () => {
     beforeEach(() => {
@@ -13,8 +17,7 @@ describe('handler: product-item', () => {
             it('should return data', async () => {
                 const productId = 5;
                 const item = (validData || []).find(
-                    (item: IProductItem) =>
-                        item.id === Number(productId)
+                    (item: IProductItem) => item.id === Number(productId)
                 );
 
                 jest.doMock('../fake-data/MOCK_DATA.json', () => ({
@@ -36,6 +39,9 @@ describe('handler: product-item', () => {
                     )
                 ).resolves.toEqual({
                     statusCode: 200,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
                     body: JSON.stringify(item),
                 });
             });
@@ -54,7 +60,10 @@ describe('handler: product-item', () => {
                     await expect(
                         getProductsById(null, null, null)
                     ).resolves.toEqual({
-                        statusCode: 500,
+                        statusCode: 400,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
                         body: JSON.stringify(
                             formatError(ErrorsEnum.WrongRequest)
                         ),
@@ -82,7 +91,10 @@ describe('handler: product-item', () => {
                             null
                         )
                     ).resolves.toEqual({
-                        statusCode: 500,
+                        statusCode: 404,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
                         body: JSON.stringify(
                             formatError(ErrorsEnum.NotFoundData)
                         ),
@@ -101,16 +113,21 @@ describe('handler: product-item', () => {
 
                     await expect(
                         getProductsById(
-                            {
+                            ({
                                 pathParameters: {
                                     productId: '999',
                                 },
-                            } as any,
+                            } as unknown) as APIGatewayProxyEventBase<
+                                APIGatewayEventDefaultAuthorizerContext
+                            >,
                             null,
                             null
                         )
                     ).resolves.toEqual({
                         statusCode: 500,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                        },
                         body: JSON.stringify(
                             formatError(ErrorsEnum.CorruptedData)
                         ),

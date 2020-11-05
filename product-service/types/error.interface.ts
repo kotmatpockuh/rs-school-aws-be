@@ -1,5 +1,6 @@
+import { ErrorsEnum } from './errors.enum';
+
 export interface IError {
-    meta: string;
-    description: string;
-    log?: string;
+    type: ErrorsEnum;
+    statusCode?: number;
 }
