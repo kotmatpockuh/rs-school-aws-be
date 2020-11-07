@@ -23,7 +23,7 @@ export const formattedErrorResponse = (error: IError): IResponseGeneric => {
         },
         body: JSON.stringify(
             // TODO implement error codes
-            formatError(error && error.type) || {}
+            formatError(error?.type, error && error?.log) || {}
         ),
     };
 };

@@ -9,6 +9,7 @@ custom:
 
 plugins:
     - serverless-webpack
+    - serverless-dotenv-plugin
 
 provider:
     name: aws
@@ -33,5 +34,29 @@ functions:
         events:
             - http:
                   method: get
+                  path: products/{productId}
+                  cors: true
+
+    createProducts:
+        handler: handlers/product-item.createProducts
+        events:
+            - http:
+                  method: post
+                  path: products
+                  cors: true
+
+    updateProducts:
+        handler: handlers/product-item.updateProducts
+        events:
+            - http:
+                  method: put
+                  path: products
+                  cors: true
+
+    removeProducts:
+        handler: handlers/product-item.removeProducts
+        events:
+            - http:
+                  method: delete
                   path: products/{productId}
                   cors: true
