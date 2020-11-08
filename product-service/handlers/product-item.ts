@@ -90,55 +90,31 @@ export const createProducts: APIGatewayProxyHandler = async (
                 throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        /*const { rows: products } = await client
-            .query(
-                `with inserted as (
-                 insert
-                   into
-                     products(title, description, price)
-                   values($1, $2, $3) returning * )
-                 select
-                   inserted.id,
-                   inserted.title,
-                   inserted.description,
-                   inserted.price,
-                   stocks.count
-                 from
-                   inserted
-                 left join stocks on
-                   inserted.id = stocks.product_id`,
-                [data?.title, data?.description, data?.price]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
-            );*/
+        let createdId = null;
+        let products = [];
 
-        const { rows: createdProducts } = await client
-            .query(
+        try {
+            await client.query('BEGIN');
+
+            const { rows: createdProducts } = await client.query(
                 `insert
-                   into
-                     products(title, description, price)
-                values($1, $2, $3) returning *`,
+                    into
+                      products(title, description, price)
+                 values($1, $2, $3) returning id`,
                 [data?.title, data?.description, data?.price]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        await client
-            .query(
+            createdId = createdProducts[0]?.id;
+
+            await client.query(
                 `insert
                    into
                      stocks(product_id, count)
                  values($1, $2)`,
-                [createdProducts[0]?.id, data?.count]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
+                [createdId, data?.count]
             );
 
-        const { rows: products } = await client
-            .query(
+            const { rows: res } = await client.query(
                 `select
                      products.id,
                      products.title,
@@ -150,11 +126,15 @@ export const createProducts: APIGatewayProxyHandler = async (
                  left join stocks on
                      products.id = stocks.product_id
                  where products.id = $1`,
-                [createdProducts[0]?.id]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
+                [createdId]
             );
+            products = res;
+
+            await client.query('COMMIT');
+        } catch (dbErr) {
+            await client.query('ROLLBACK');
+            throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr));
+        }
 
         if (!products[0]) {
             throwError(ErrorsEnum.NotFoundData, 404);
@@ -195,9 +175,12 @@ export const updateProducts: APIGatewayProxyHandler = async (
                 throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        // TODO SQL should be optimized :)
-        await client
-            .query(
+        let products = [];
+
+        try {
+            await client.query('BEGIN');
+
+            await client.query(
                 `update
                       products
                     set
@@ -207,13 +190,9 @@ export const updateProducts: APIGatewayProxyHandler = async (
                     where
                       id = $1`,
                 [data?.id, data?.title, data?.description, data?.price]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        await client
-            .query(
+            await client.query(
                 `insert
                       into
                       stocks (product_id, count)
@@ -223,13 +202,9 @@ export const updateProducts: APIGatewayProxyHandler = async (
                     set
                       count = $2`,
                 [data?.id, data?.count]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        const { rows: products } = await client
-            .query(
+            const { rows: res } = await client.query(
                 `select
                      products.id,
                      products.title,
@@ -242,10 +217,14 @@ export const updateProducts: APIGatewayProxyHandler = async (
                      products.id = stocks.product_id
                  where products.id = $1`,
                 [data?.id]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
+            products = res;
+
+            await client.query('COMMIT');
+        } catch (dbErr) {
+            await client.query('ROLLBACK');
+            throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr));
+        }
 
         if (!products[0]) {
             throwError(ErrorsEnum.NotFoundData, 404);
