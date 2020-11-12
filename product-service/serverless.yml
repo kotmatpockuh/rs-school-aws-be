@@ -38,7 +38,7 @@ functions:
                   cors: true
 
     createProducts:
-        handler: handlers/product-item.createProducts
+        handler: handlers/product-item-create.createProducts
         events:
             - http:
                   method: post
@@ -46,7 +46,7 @@ functions:
                   cors: true
 
     updateProducts:
-        handler: handlers/product-item.updateProducts
+        handler: handlers/product-item-upsert.upsertProducts
         events:
             - http:
                   method: put
@@ -54,7 +54,7 @@ functions:
                   cors: true
 
     removeProducts:
-        handler: handlers/product-item.removeProducts
+        handler: handlers/product-item-delete.deleteProducts
         events:
             - http:
                   method: delete

@@ -12,19 +12,24 @@ import {
 } from '../helpers/response.helper';
 import { dbOptions } from '../helpers/db.helper';
 import * as pg from 'pg';
-import { isUUIDv4 } from '../helpers/request.helper';
 
-export const getProductsById: APIGatewayProxyHandler = async (
+export const createProducts: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
 ) => {
-    console.log('📝 getProductsById: ', event);
+    console.log('📝 createProducts: ', event);
 
     const client = new pg.Client(dbOptions);
 
     try {
-        const id = event?.pathParameters?.productId;
+        const data = JSON.parse(event?.body || null);
 
-        if (id == null || (id && !isUUIDv4(id))) {
+        if (
+            data == null ||
+            !data?.title ||
+            !data?.description ||
+            !data?.price ||
+            !data?.count
+        ) {
             throwError(ErrorsEnum.WrongRequest, 400);
         }
 
@@ -34,8 +39,31 @@ export const getProductsById: APIGatewayProxyHandler = async (
                 throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        const { rows: products } = await client
-            .query(
+        let createdId = null;
+        let products = [];
+
+        try {
+            await client.query('BEGIN');
+
+            const { rows: createdProducts } = await client.query(
+                `insert
+                    into
+                      products(title, description, price)
+                 values($1, $2, $3) returning id`,
+                [data?.title, data?.description, data?.price]
+            );
+
+            createdId = createdProducts[0]?.id;
+
+            await client.query(
+                `insert
+                   into
+                     stocks(product_id, count)
+                 values($1, $2)`,
+                [createdId, data?.count]
+            );
+
+            const { rows: res } = await client.query(
                 `select
                      products.id,
                      products.title,
@@ -47,11 +75,15 @@ export const getProductsById: APIGatewayProxyHandler = async (
                  left join stocks on
                      products.id = stocks.product_id
                  where products.id = $1`,
-                [id]
-            )
-            .catch((dbErr) =>
-                throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
+                [createdId]
             );
+            products = res;
+
+            await client.query('COMMIT');
+        } catch (dbErr) {
+            await client.query('ROLLBACK');
+            throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr));
+        }
 
         if (!products[0]) {
             throwError(ErrorsEnum.NotFoundData, 404);

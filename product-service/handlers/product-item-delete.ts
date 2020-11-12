@@ -14,10 +14,10 @@ import { dbOptions } from '../helpers/db.helper';
 import * as pg from 'pg';
 import { isUUIDv4 } from '../helpers/request.helper';
 
-export const getProductsById: APIGatewayProxyHandler = async (
+export const deleteProducts: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
 ) => {
-    console.log('📝 getProductsById: ', event);
+    console.log('📝 deleteProducts: ', event);
 
     const client = new pg.Client(dbOptions);
 
@@ -34,30 +34,20 @@ export const getProductsById: APIGatewayProxyHandler = async (
                 throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        const { rows: products } = await client
+        await client
             .query(
-                `select
-                     products.id,
-                     products.title,
-                     products.description,
-                     products.price,
-                     stocks.count
-                 from
-                     products
-                 left join stocks on
-                     products.id = stocks.product_id
-                 where products.id = $1`,
+                `delete
+                    from
+                      products
+                    where
+                      id = $1`,
                 [id]
             )
             .catch((dbErr) =>
                 throwError(ErrorsEnum.DBError, 500, JSON.stringify(dbErr))
             );
 
-        if (!products[0]) {
-            throwError(ErrorsEnum.NotFoundData, 404);
-        }
-
-        return formattedSuccessResponse(products[0]);
+        return formattedSuccessResponse({});
     } catch (error) {
         return formattedErrorResponse(error);
     } finally {
