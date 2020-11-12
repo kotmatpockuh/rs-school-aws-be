@@ -4,4 +4,5 @@ export enum ErrorsEnum {
     NotFoundData = 'not_found_data',
     WrongRequest = 'wrong_request',
     GenericError = 'generic_error',
+    DBError = 'db_error',
 }
