@@ -4,12 +4,12 @@ import {
     APIGatewayProxyHandler,
 } from 'aws-lambda';
 import 'source-map-support/register';
-import { ErrorsEnum } from '../types/errors.enum';
+import { ErrorsEnum } from '../../shared/types/errors.enum';
 import {
     formattedErrorResponse,
     formattedSuccessResponse,
-} from '../helpers/response.helper';
-import { throwError } from '../helpers/error.helper';
+} from '../../shared/helpers/response.helper';
+import { throwError } from '../../shared/helpers/error.helper';
 import { dbOptions } from '../helpers/db.helper';
 import * as pg from 'pg';
 

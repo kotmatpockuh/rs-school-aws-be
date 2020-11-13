@@ -1,6 +1,6 @@
 import validData from '../fake-data/MOCK_DATA.json';
-import { formatError } from '../helpers/error.helper';
-import { ErrorsEnum } from '../types/errors.enum';
+import { formatError } from '../../shared/helpers/error.helper';
+import { ErrorsEnum } from '../../shared/types/errors.enum';
 import { IProductItem } from '../types/product-item.interface';
 import {
     APIGatewayEventDefaultAuthorizerContext,
