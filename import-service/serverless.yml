@@ -19,14 +19,16 @@ provider:
     environment:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     iamRoleStatements:
-        - Effect: "Allow"
-          Action: "s3:ListBucket"
-          Resources:
-              - "arn:aws:s3:::pav-import-data"
-        - Effect: "Allow"
-              Action: "s3:*"
-              Resources:
-                  - "arn:aws:s3:::pav-import-data/*"
+        - Effect: Allow
+          Action:
+              - 's3:ListBucket'
+          Resource:
+              - 'arn:aws:s3:::pav-import-data'
+        - Effect: Allow
+          Action:
+              - 's3:*'
+          Resource:
+              - 'arn:aws:s3:::pav-import-data/*'
 
 functions:
     importProductsFile:
