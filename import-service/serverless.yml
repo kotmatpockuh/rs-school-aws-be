@@ -42,3 +42,12 @@ functions:
                       parameters:
                           querystrings:
                               name: true
+    importFileParser:
+        handler: handlers/import-file.importFileParser
+        events:
+            - s3:
+                  bucket: pav-import-data
+                  event: s3:ObjectCreated:*
+                  rules:
+                      - prefix: uploaded/
+                  existing: true

@@ -27,7 +27,7 @@ export const importProductsFile: APIGatewayProxyHandler = async (
 
         const s3 = new AWS.S3({ region: 'eu-west-1' });
 
-        const url = s3.getSignedUrl('getObject', {
+        const url = await s3.getSignedUrlPromise('getObject', {
             Bucket: BUCKET,
             Key: `uploaded/${fileName}`,
             Expires: 60,
