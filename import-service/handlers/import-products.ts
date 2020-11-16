@@ -9,7 +9,7 @@ import {
     formattedSuccessResponse,
 } from '../../shared/helpers/response.helper';
 import AWS from 'aws-sdk';
-import { BUCKET } from '../constants';
+import { ALLOWED_FILE_CONTENT_TYPE, BUCKET } from '../constants';
 import { throwError } from '../../shared/helpers/error.helper';
 import { ErrorsEnum } from '../../shared/types/errors.enum';
 
@@ -25,13 +25,18 @@ export const importProductsFile: APIGatewayProxyHandler = async (
             throwError(ErrorsEnum.WrongRequest, 400);
         }
 
-        const s3 = new AWS.S3({ region: 'eu-west-1' });
+        const s3 = new AWS.S3({ region: 'eu-west-1', signatureVersion: 'v4' });
 
-        const url = await s3.getSignedUrlPromise('getObject', {
-            Bucket: BUCKET,
-            Key: `uploaded/${fileName}`,
-            Expires: 60,
-        });
+        const url = await s3
+            .getSignedUrlPromise('putObject', {
+                Bucket: BUCKET,
+                Key: `uploaded/${fileName}`,
+                Expires: 60,
+                ContentType: ALLOWED_FILE_CONTENT_TYPE,
+            })
+            .catch((s3Err) =>
+                throwError(ErrorsEnum.CorruptedData, 500, JSON.stringify(s3Err))
+            );
 
         return formattedSuccessResponse(url);
     } catch (error) {

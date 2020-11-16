@@ -10,6 +10,7 @@ export const formattedSuccessResponse = <T>(
         statusCode,
         headers: {
             'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': '*'
         },
         body: JSON.stringify(data || {}),
     };
@@ -20,6 +21,7 @@ export const formattedErrorResponse = (error: IError): IResponseGeneric => {
         statusCode: (error && error.statusCode) || 500,
         headers: {
             'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': '*'
         },
         body: JSON.stringify(
             // TODO implement error codes
