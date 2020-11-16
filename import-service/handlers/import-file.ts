@@ -41,16 +41,18 @@ export const importFileParser: (
                         ''
                     )}`,
                 })
-                .promise()
-                .then(() => console.log('🏓 copied file'));
+                .promise();
+
+            console.log('🏓 copied file: ', record.s3.object.key);
 
             await s3
                 .deleteObject({
                     Bucket: BUCKET,
                     Key: record.s3.object.key,
                 })
-                .promise()
-                .then(() => console.log('🚮 deleted file'));
+                .promise();
+
+            console.log('🚮 deleted file: ', record.s3.object.key);
         }
 
         return { statusCode: 202 };
