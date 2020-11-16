@@ -24,32 +24,33 @@ export const importFileParser: (
                 await stream
                     .pipe(CSV())
                     .on('data', (data) => csvData.push(data))
-                    .on('error', (err) => console.log('🧨 error: ', err))
-                    .on('end', async () => {
+                    .on('end', () =>
                         console.log(
                             `👀 CSV parsed at ${new Date()}, content: `,
                             csvData
-                        );
-
-                        await s3
-                            .copyObject({
-                                Bucket: BUCKET,
-                                CopySource: BUCKET + '/' + record.s3.object.key,
-                                Key: `parsed/${record.s3.object.key.replace(
-                                    'uploaded/',
-                                    ''
-                                )}`,
-                            })
-                            .promise();
-
-                        await s3
-                            .deleteObject({
-                                Bucket: BUCKET,
-                                Key: record.s3.object.key,
-                            })
-                            .promise();
-                    });
+                        )
+                    );
             }
+
+            await s3
+                .copyObject({
+                    Bucket: BUCKET,
+                    CopySource: BUCKET + '/' + record.s3.object.key,
+                    Key: `parsed/${record.s3.object.key.replace(
+                        'uploaded/',
+                        ''
+                    )}`,
+                })
+                .promise()
+                .then(() => console.log('🏓 copied file'));
+
+            await s3
+                .deleteObject({
+                    Bucket: BUCKET,
+                    Key: record.s3.object.key,
+                })
+                .promise()
+                .then(() => console.log('🚮 deleted file'));
         }
 
         return { statusCode: 202 };
