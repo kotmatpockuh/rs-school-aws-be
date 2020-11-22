@@ -18,6 +18,10 @@ provider:
         minimumCompressionSize: 1024
     environment:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+        SQS_URL:
+            Ref: SQSQueue
+        SNS_ARN:
+            Ref: SNSTopic
     iamRoleStatements:
         - Effect: Allow
           Action:
@@ -29,6 +33,34 @@ provider:
               - 's3:*'
           Resource:
               - 'arn:aws:s3:::pav-import-data/*'
+        - Effect: Allow
+          Action:
+              - 'sqs:*'
+          Resource:
+              - Fn::GetAtt: [SQSQueue, Arn]
+        - Effect: Allow
+          Action:
+              - 'sns:*'
+          Resource:
+              Ref: SNSTopic
+
+resources:
+    Resources:
+        SQSQueue:
+            Type: AWS::SQS::Queue
+            Properties:
+                QueueName: catalogItemsQueue
+        SNSTopic:
+            Type: AWS::SNS::Topic
+            Properties:
+                TopicName: createProductTopic
+        SNSSubscription:
+            Type: AWS::SNS::Subscription
+            Properties:
+                Endpoint: dobrenko92@gmail.com
+                Protocol: email
+                TopicArn:
+                    Ref: SNSTopic
 
 functions:
     importProductsFile:
@@ -42,6 +74,7 @@ functions:
                       parameters:
                           querystrings:
                               name: true
+
     importFileParser:
         handler: handlers/import-file.importFileParser
         events:
@@ -51,3 +84,13 @@ functions:
                   rules:
                       - prefix: uploaded/
                   existing: true
+
+    catalogBatchProcess:
+        handler: handlers/import-batch-process.catalogBatchProcess
+        events:
+            - sqs:
+                  batchSize: 5
+                  arn:
+                      Fn::GetAtt:
+                          - SQSQueue
+                          - Arn

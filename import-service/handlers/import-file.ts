@@ -1,6 +1,6 @@
 import { S3Event } from 'aws-lambda';
 import 'source-map-support/register';
-import { BUCKET } from '../constants';
+import { BUCKET, DEFAULT_AWS_REGION } from '../../shared/constants';
 import AWS from 'aws-sdk';
 import CSV from 'csv-parser';
 
@@ -8,7 +8,8 @@ export const importFileParser: (
     event: S3Event
 ) => Promise<{ statusCode: number }> = async (event: S3Event) => {
     try {
-        const s3 = new AWS.S3({ region: 'eu-west-1' });
+        const s3 = new AWS.S3(DEFAULT_AWS_REGION);
+        const sqs = new AWS.SQS(DEFAULT_AWS_REGION);
 
         for (const record of event.Records) {
             if (record.s3.object.key.endsWith('.csv')) {
@@ -24,12 +25,21 @@ export const importFileParser: (
                 await stream
                     .pipe(CSV())
                     .on('data', (data) => csvData.push(data))
-                    .on('end', () =>
+                    .on('end', () => {
                         console.log(
                             `👀 CSV parsed at ${new Date()}, content: `,
                             csvData
-                        )
-                    );
+                        );
+
+                        csvData.forEach(async (csvItem) => {
+                            await sqs
+                                .sendMessage({
+                                    QueueUrl: process.env.SQS_URL,
+                                    MessageBody: JSON.stringify(csvItem),
+                                })
+                                .promise();
+                        });
+                    });
             }
 
             await s3
