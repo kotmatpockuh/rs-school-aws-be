@@ -6,11 +6,12 @@
     "module": "esnext",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "target": "es2017",
     "outDir": "lib",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": ["./**/*.ts"],
   "exclude": [

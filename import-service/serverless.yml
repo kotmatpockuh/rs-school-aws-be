@@ -19,9 +19,9 @@ provider:
     environment:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
         SQS_URL:
-            Ref: SQSQueue
+            Fn::ImportValue: SQSQueue
         SNS_ARN:
-            Ref: SNSTopic
+            Fn::ImportValue: SNSTopic
     iamRoleStatements:
         - Effect: Allow
           Action:
@@ -37,30 +37,12 @@ provider:
           Action:
               - 'sqs:*'
           Resource:
-              - Fn::GetAtt: [SQSQueue, Arn]
+              - Fn::ImportValue: SQSQueueARN
         - Effect: Allow
           Action:
               - 'sns:*'
           Resource:
-              Ref: SNSTopic
-
-resources:
-    Resources:
-        SQSQueue:
-            Type: AWS::SQS::Queue
-            Properties:
-                QueueName: catalogItemsQueue
-        SNSTopic:
-            Type: AWS::SNS::Topic
-            Properties:
-                TopicName: createProductTopic
-        SNSSubscription:
-            Type: AWS::SNS::Subscription
-            Properties:
-                Endpoint: dobrenko92@gmail.com
-                Protocol: email
-                TopicArn:
-                    Ref: SNSTopic
+              - Fn::ImportValue: SNSTopic
 
 functions:
     importProductsFile:
@@ -84,13 +66,3 @@ functions:
                   rules:
                       - prefix: uploaded/
                   existing: true
-
-    catalogBatchProcess:
-        handler: handlers/import-batch-process.catalogBatchProcess
-        events:
-            - sqs:
-                  batchSize: 5
-                  arn:
-                      Fn::GetAtt:
-                          - SQSQueue
-                          - Arn

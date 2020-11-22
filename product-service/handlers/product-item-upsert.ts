@@ -12,6 +12,7 @@ import {
 } from '../../shared/helpers/response.helper';
 import { dbOptions } from '../helpers/db.helper';
 import * as pg from 'pg';
+import { IProductItem } from '../types/product-item.interface';
 
 export const upsertProducts: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>
@@ -21,7 +22,7 @@ export const upsertProducts: APIGatewayProxyHandler = async (
     const client = new pg.Client(dbOptions);
 
     try {
-        const data = JSON.parse(event?.body || null);
+        const data = <IProductItem>JSON.parse(event?.body || null);
 
         if (
             data == null ||
