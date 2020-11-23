@@ -52,7 +52,10 @@ resources:
                 Protocol: email
                 TopicArn:
                     Ref: SNSTopic
-        SNSErrorSubscription:
+                FilterPolicy:
+                    usaCar:
+                        - false
+        SNSCustomSubscription:
             Type: AWS::SNS::Subscription
             Properties:
                 Endpoint: '${env:SNS_ERROR_EMAIL}'

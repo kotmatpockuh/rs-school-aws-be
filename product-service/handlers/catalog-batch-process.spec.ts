@@ -4,11 +4,14 @@ import { IProductItem } from '../types/product-item.interface';
 import { ProductService } from '../services/product.service';
 import AWS, { SNS } from 'aws-sdk';
 
+jest.mock('../services/product.service');
+
 jest.mock('aws-sdk', () => {
     const SNSMocked = {
         publish: jest.fn().mockReturnThis(),
         promise: jest.fn(),
     };
+
     return {
         SNS: jest.fn(() => SNSMocked),
     };
@@ -31,7 +34,7 @@ describe('handler: catalog-batch-process', () => {
 
     describe('on catalogBatchProcess', () => {
         describe('given error do not exist', () => {
-            it('should call service and sns', () => {
+            it('should send sns messages', async () => {
                 bodyData = {
                     title: 'fake-title',
                     description: 'fake-description',
@@ -39,12 +42,7 @@ describe('handler: catalog-batch-process', () => {
                     count: 5,
                 };
 
-                const createBatchProductsSpy = spyOn(
-                    productService,
-                    'createBatchProducts'
-                );
-
-                catalogBatchProcess(({
+                await catalogBatchProcess(({
                     Records: [
                         {
                             body: JSON.stringify(bodyData),
@@ -57,10 +55,39 @@ describe('handler: catalog-batch-process', () => {
                     Subject: '🤔 Data is being processed',
                     Message: JSON.stringify(bodyData),
                     TopicArn: process.env.SNS_ARN,
+                    MessageAttributes: {
+                        usaCar: {
+                            DataType: 'String',
+                            StringValue: Boolean(
+                                bodyData.title.toUpperCase().includes('FORD')
+                            ).toString(),
+                        },
+                    },
                 });
+            });
 
-                expect(createBatchProductsSpy).toHaveBeenCalledTimes(1);
-                expect(createBatchProductsSpy).toHaveBeenCalledWith([bodyData]);
+            it('should call service', async () => {
+                bodyData = {
+                    title: 'fake-title',
+                    description: 'fake-description',
+                    price: 9,
+                    count: 5,
+                };
+
+                await catalogBatchProcess(({
+                    Records: [
+                        {
+                            body: JSON.stringify(bodyData),
+                        },
+                    ],
+                } as unknown) as SQSEvent);
+
+                expect(
+                    productService.createBatchProducts
+                ).toHaveBeenCalledTimes(1);
+                expect(
+                    productService.createBatchProducts
+                ).toHaveBeenCalledWith([bodyData]);
             });
 
             it('should return nothing', async () => {

@@ -31,25 +31,16 @@ export const catalogBatchProcess: (event: SQSEvent) => Promise<void> = async (
                     Subject: '🤔 Data is being processed',
                     Message: JSON.stringify(product),
                     TopicArn: process.env.SNS_ARN,
+                    MessageAttributes: {
+                        usaCar: {
+                            DataType: 'String',
+                            StringValue: Boolean(
+                                product.title.toUpperCase().includes('FORD')
+                            ).toString(),
+                        },
+                    },
                 })
                 .promise();
-
-            // TODO just for an example
-            if (product.title.toUpperCase().includes('FORD')) {
-                await sns
-                    .publish({
-                        Subject: '🤔 Car from USA is being processed',
-                        Message: JSON.stringify(product),
-                        TopicArn: process.env.SNS_ARN,
-                        MessageAttributes: {
-                            usaCar: {
-                                DataType: 'String',
-                                StringValue: product.title,
-                            },
-                        },
-                    })
-                    .promise();
-            }
         }
 
         await productService.createBatchProducts(products);
