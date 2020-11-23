@@ -52,9 +52,6 @@ resources:
                 Protocol: email
                 TopicArn:
                     Ref: SNSTopic
-                FilterPolicy:
-                    usaCar:
-                        - false
         SNSCustomSubscription:
             Type: AWS::SNS::Subscription
             Properties:
