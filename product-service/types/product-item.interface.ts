@@ -1,10 +1,7 @@
 export interface IProductItem {
-    id: number;
-    make: string;
-    model: string;
-    year: number;
-    vin: string;
+    id?: number;
+    title: string;
     description: string;
-    photo_url: string;
-    price: string;
+    price: number | string;
+    count: number;
 }

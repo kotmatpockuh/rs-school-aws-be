@@ -18,6 +18,10 @@ provider:
         minimumCompressionSize: 1024
     environment:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+        SQS_URL:
+            Fn::ImportValue: SQSQueue
+        SNS_ARN:
+            Fn::ImportValue: SNSTopic
     iamRoleStatements:
         - Effect: Allow
           Action:
@@ -29,6 +33,16 @@ provider:
               - 's3:*'
           Resource:
               - 'arn:aws:s3:::pav-import-data/*'
+        - Effect: Allow
+          Action:
+              - 'sqs:*'
+          Resource:
+              - Fn::ImportValue: SQSQueueARN
+        - Effect: Allow
+          Action:
+              - 'sns:*'
+          Resource:
+              - Fn::ImportValue: SNSTopic
 
 functions:
     importProductsFile:
@@ -42,6 +56,7 @@ functions:
                       parameters:
                           querystrings:
                               name: true
+
     importFileParser:
         handler: handlers/import-file.importFileParser
         events:

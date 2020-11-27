@@ -19,6 +19,72 @@ provider:
         minimumCompressionSize: 1024
     environment:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+        SQS_URL:
+            Ref: SQSQueue
+        SNS_ARN:
+            Ref: SNSTopic
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - 'sqs:*'
+          Resource:
+              - Fn::GetAtt: [SQSQueue, Arn]
+        - Effect: Allow
+          Action:
+              - 'sns:*'
+          Resource:
+              Ref: SNSTopic
+
+resources:
+    Resources:
+        SQSQueue:
+            Type: AWS::SQS::Queue
+            Properties:
+                QueueName: catalogItemsSQSQueue
+        SNSTopic:
+            Type: AWS::SNS::Topic
+            Properties:
+                TopicName: createProductTopic
+        SNSSubscription:
+            Type: AWS::SNS::Subscription
+            Properties:
+                Endpoint: '${env:SNS_EMAIL}'
+                Protocol: email
+                TopicArn:
+                    Ref: SNSTopic
+        SNSCustomSubscription:
+            Type: AWS::SNS::Subscription
+            Properties:
+                Endpoint: '${env:SNS_ERROR_EMAIL}'
+                Protocol: email
+                TopicArn:
+                    Ref: SNSTopic
+                FilterPolicy:
+                    usaCar:
+                        - true
+    Outputs:
+        SQSQueue:
+            Value:
+                Ref: SQSQueue
+            Export:
+                Name: SQSQueue
+        SQSQueueARN:
+            Value:
+                Fn::GetAtt:
+                    - SQSQueue
+                    - Arn
+            Export:
+                Name: SQSQueueARN
+        SNSTopic:
+            Value:
+                Ref: SNSTopic
+            Export:
+                Name: SNSTopic
+        SNSSubscription:
+            Value:
+                Ref: SNSSubscription
+            Export:
+                Name: SNSSubscription
 
 functions:
     getProductsList:
@@ -60,3 +126,13 @@ functions:
                   method: delete
                   path: products/{productId}
                   cors: true
+
+    catalogBatchProcess:
+        handler: handlers/catalog-batch-process.catalogBatchProcess
+        events:
+            - sqs:
+                  batchSize: 5
+                  arn:
+                      Fn::GetAtt:
+                          - SQSQueue
+                          - Arn

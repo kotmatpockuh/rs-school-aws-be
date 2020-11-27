@@ -9,7 +9,7 @@ import {
     formattedSuccessResponse,
 } from '../../shared/helpers/response.helper';
 import AWS from 'aws-sdk';
-import { ALLOWED_FILE_CONTENT_TYPE, BUCKET } from '../constants';
+import { ALLOWED_FILE_CONTENT_TYPE, BUCKET } from '../../shared/constants';
 import { throwError } from '../../shared/helpers/error.helper';
 import { ErrorsEnum } from '../../shared/types/errors.enum';
 
