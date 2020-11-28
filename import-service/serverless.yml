@@ -44,6 +44,25 @@ provider:
           Resource:
               - Fn::ImportValue: SNSTopic
 
+resources:
+    Resources:
+        GatewayResponseDenied:
+            Type: AWS::ApiGateway::GatewayResponse
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+                ResponseType: ACCESS_DENIED
+                RestApiId: !Ref ApiGatewayRestApi
+        GatewayResponseUnauthorized:
+            Type: AWS::ApiGateway::GatewayResponse
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+                ResponseType: UNAUTHORIZED
+                RestApiId: !Ref ApiGatewayRestApi
+
 functions:
     importProductsFile:
         handler: handlers/import-products.importProductsFile
@@ -52,6 +71,13 @@ functions:
                   method: get
                   path: import
                   cors: true
+                  authorizer:
+                      name: tokenAuthorizer
+                      arn:
+                          Fn::ImportValue: AuthorizationARN
+                      resultTtlInSeconds: 0
+                      identitySource: method.request.header.Authorization
+                      type: token
                   request:
                       parameters:
                           querystrings:
