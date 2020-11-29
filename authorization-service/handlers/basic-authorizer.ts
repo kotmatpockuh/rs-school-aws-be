@@ -24,8 +24,9 @@ export const basicAuthorizer: (
         console.log('🔓 unlocked: ', authData, decodedUserPwd);
 
         // TODO remove it later
-        const username = decodedUserPwd.split(':')[0];
-        const pwd = decodedUserPwd.split(':')[1];
+        const separatorChar = '=';
+        const username = decodedUserPwd.split(separatorChar)[0];
+        const pwd = decodedUserPwd.split(separatorChar)[1];
         const storedUserPwd = process.env[username];
         const effect =
             !storedUserPwd || storedUserPwd !== pwd ? 'Deny' : 'Allow';

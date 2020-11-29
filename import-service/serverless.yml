@@ -46,7 +46,7 @@ provider:
 
 resources:
     Resources:
-        GatewayResponseDenied:
+        GatewayResponseAccessDenied:
             Type: AWS::ApiGateway::GatewayResponse
             Properties:
                 ResponseParameters:
