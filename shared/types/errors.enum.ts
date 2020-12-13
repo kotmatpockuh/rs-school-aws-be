@@ -5,4 +5,6 @@ export enum ErrorsEnum {
     WrongRequest = 'wrong_request',
     GenericError = 'generic_error',
     DBError = 'db_error',
+    AccessDenied = 'access_denied',
+    CorruptedAuthorization = 'corrupted_authorization',
 }
