@@ -5,7 +5,7 @@ const axios = require('axios').default;
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const cacheObj = {};
+const cachedData = {};
 
 app.use(express.json());
 
@@ -28,19 +28,19 @@ app.all('/*', (req, res) => {
 
         if (
             isCachedUrl &&
-            cacheObj[requestUrl] &&
-            cacheObj[requestUrl].expires > Date.now()
+            cachedData[requestUrl] &&
+            cachedData[requestUrl].expiredAt > Date.now()
         ) {
-            res.json(cacheObj[requestUrl].value);
+            res.json(cachedData[requestUrl].value);
             return;
         }
 
         axios(config)
             .then((resp) => {
                 if (isCachedUrl) {
-                    cacheObj[requestUrl] = {
+                    cachedData[requestUrl] = {
                         value: resp.data,
-                        expires: Date.now() + 2 * 60 * 1000 // wait for 2 minutes,
+                        expiredAt: Date.now() + 2 * 60 * 1000, // wait for 2 minutes,
                     };
                 }
 
